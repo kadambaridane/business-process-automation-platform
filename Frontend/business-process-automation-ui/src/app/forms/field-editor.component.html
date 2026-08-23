@@ -1,0 +1,108 @@
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<ng-container *ngIf="form() as f">
+  <div class="page-header">
+    <h1>{{ f.name }}</h1>
+    <div class="form-actions">
+      <a [routerLink]="['/applications', applicationId, 'forms']" class="btn-secondary">Back to Forms</a>
+      <button type="button" class="btn-secondary" (click)="toggleStatus()">
+        {{ f.isActive ? 'Deactivate' : 'Activate' }}
+      </button>
+      <button type="button" class="btn-primary" (click)="openAddField()">+ Add Field</button>
+    </div>
+  </div>
+
+  <p>
+    Status:
+    <span class="badge" [class.badge-active]="f.isActive" [class.badge-inactive]="!f.isActive">
+      {{ f.isActive ? 'Active' : 'Inactive' }}
+    </span>
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Field Name</th>
+        <th>Label</th>
+        <th>Type</th>
+        <th>Required</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let field of f.fields; let i = index">
+        <td>
+          <button type="button" (click)="moveField(field, -1)" [disabled]="i === 0">↑</button>
+          <button type="button" (click)="moveField(field, 1)" [disabled]="i === f.fields.length - 1">↓</button>
+        </td>
+        <td>{{ field.fieldName }}</td>
+        <td>{{ field.label }}</td>
+        <td>{{ field.fieldType }}</td>
+        <td>{{ field.isRequired ? 'Yes' : 'No' }}</td>
+        <td class="actions">
+          <button type="button" (click)="openEditField(field)">Edit</button>
+          <button type="button" (click)="deleteField(field)">Delete</button>
+        </td>
+      </tr>
+      <tr *ngIf="f.fields.length === 0">
+        <td colspan="6" class="empty">No fields yet. Click "+ Add Field" to start building this form.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="form-card" *ngIf="showFieldEditor" style="margin-top: 24px; max-width: 640px;">
+    <h1 style="font-size: 1.1rem;">{{ editingFieldId ? 'Edit Field' : 'Add Field' }}</h1>
+
+    <form [formGroup]="fieldForm" (ngSubmit)="saveField()">
+      <label for="fieldName">Field Name (internal key)</label>
+      <input id="fieldName" type="text" formControlName="fieldName" placeholder="e.g. employeeName" />
+
+      <label for="label">Display Label</label>
+      <input id="label" type="text" formControlName="label" placeholder="e.g. Employee Name" />
+
+      <label for="fieldType">Field Type</label>
+      <select id="fieldType" formControlName="fieldType">
+        <option *ngFor="let type of fieldTypes" [value]="type">{{ type }}</option>
+      </select>
+
+      <label class="checkbox-option">
+        <input type="checkbox" formControlName="isRequired" />
+        Required
+      </label>
+
+      <label for="defaultValue">Default Value</label>
+      <input id="defaultValue" type="text" formControlName="defaultValue" />
+
+      <ng-container *ngIf="needsLengthRules">
+        <label for="minLength">Min Length</label>
+        <input id="minLength" type="number" formControlName="minLength" />
+        <label for="maxLength">Max Length</label>
+        <input id="maxLength" type="number" formControlName="maxLength" />
+        <label for="pattern">Pattern (regex, optional)</label>
+        <input id="pattern" type="text" formControlName="pattern" />
+      </ng-container>
+
+      <ng-container *ngIf="needsRangeRules">
+        <label for="min">Min Value</label>
+        <input id="min" type="number" formControlName="min" />
+        <label for="max">Max Value</label>
+        <input id="max" type="number" formControlName="max" />
+      </ng-container>
+
+      <ng-container *ngIf="needsOptions">
+        <label for="optionsCsv">Options (comma-separated)</label>
+        <input id="optionsCsv" type="text" formControlName="optionsCsv" placeholder="e.g. Sick, Vacation, Personal" />
+      </ng-container>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save Field' }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="cancelFieldEditor()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</ng-container>

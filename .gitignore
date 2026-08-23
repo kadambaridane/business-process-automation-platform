@@ -1,0 +1,22 @@
+# ---- .NET / Backend ----
+Backend/**/bin/
+Backend/**/obj/
+Backend/*.user
+Backend/**/appsettings.*.local.json
+*.mdf
+*.ldf
+
+# ---- Angular / Frontend ----
+Frontend/**/node_modules/
+Frontend/**/dist/
+Frontend/**/.angular/
+Frontend/**/*.log
+
+# ---- IDE ----
+.vs/
+.vscode/
+*.suo
+
+# ---- Secrets (never commit) ----
+**/secrets.json
+**/*.env

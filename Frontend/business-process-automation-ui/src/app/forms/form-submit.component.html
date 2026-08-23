@@ -1,0 +1,26 @@
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<div *ngIf="submittedResult() as result" class="form-success">
+  Submitted successfully (submission #{{ result.id }}). Thank you.
+  <a *ngIf="result.workflowInstanceId" [routerLink]="['/workflow-instances', result.workflowInstanceId]">
+    Track its progress here.
+  </a>
+</div>
+
+<ng-container *ngIf="activeForm() as form">
+  <div class="page-header">
+    <h1>{{ form.name }}</h1>
+    <a [routerLink]="['/applications', applicationId]" class="btn-secondary">Back to Application</a>
+  </div>
+
+  <div class="form-card" style="max-width: 640px;" *ngIf="!submittedResult()">
+    <app-dynamic-form
+      [fields]="form.fields"
+      [submitting]="submitting()"
+      submitLabel="Submit Request"
+      (formSubmit)="onSubmit($event)"
+    ></app-dynamic-form>
+  </div>
+</ng-container>

@@ -1,0 +1,51 @@
+<div class="page-header">
+  <h1>Workflows</h1>
+  <a [routerLink]="['/applications', applicationId]" class="btn-secondary">Back to Application</a>
+</div>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<div class="form-card" style="max-width: 100%; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end;">
+  <div style="flex: 1;">
+    <label for="newWorkflowName">New workflow name</label>
+    <input id="newWorkflowName" type="text" [(ngModel)]="newWorkflowName" placeholder="e.g. Leave Approval Workflow" />
+  </div>
+  <button type="button" class="btn-primary" [disabled]="creating" (click)="createWorkflow()">
+    {{ creating ? 'Creating...' : 'Create Workflow' }}
+  </button>
+</div>
+
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<table class="data-table" *ngIf="!loading()">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Steps</th>
+      <th>Created Date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let workflow of workflows()">
+      <td><a [routerLink]="['/applications', applicationId, 'workflows', workflow.id]">{{ workflow.name }}</a></td>
+      <td>
+        <span class="badge" [class.badge-active]="workflow.isActive" [class.badge-inactive]="!workflow.isActive">
+          {{ workflow.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </td>
+      <td>{{ workflow.stepCount }}</td>
+      <td>{{ workflow.createdDate | date: 'mediumDate' }}</td>
+      <td class="actions">
+        <a [routerLink]="['/applications', applicationId, 'workflows', workflow.id]">Manage Steps</a>
+        <button type="button" (click)="toggleStatus(workflow)">
+          {{ workflow.isActive ? 'Deactivate' : 'Activate' }}
+        </button>
+      </td>
+    </tr>
+    <tr *ngIf="workflows().length === 0">
+      <td colspan="5" class="empty">No workflows configured yet.</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,68 @@
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<ng-container *ngIf="task() as t">
+  <div class="page-header">
+    <h1>{{ t.title }}</h1>
+    <a [routerLink]="['/workflow-instances', t.workflowInstanceId]" class="btn-secondary">View Workflow</a>
+  </div>
+
+  <div class="form-card" style="max-width: 640px;">
+    <p><strong>Application:</strong> {{ t.applicationName }}</p>
+    <p><strong>Type:</strong> {{ t.stepType }}</p>
+    <p><strong>Assigned To:</strong> {{ t.assignedToUserName || t.assignedRoleName || '-' }}</p>
+    <p><strong>Status:</strong>
+      <span
+        class="badge"
+        [class.badge-active]="t.status === 'Approved' || t.status === 'Completed'"
+        [class.badge-inactive]="t.status === 'Pending'"
+        [style.background]="t.status === 'Rejected' ? '#fdeceb' : null"
+        [style.color]="t.status === 'Rejected' ? '#c0392b' : null"
+      >
+        {{ t.status }}
+      </span>
+    </p>
+
+    <h1 style="font-size: 1rem; margin-top: 20px;">Submitted Data</h1>
+    <p *ngFor="let entry of submissionEntries"><strong>{{ entry[0] }}:</strong> {{ entry[1] }}</p>
+
+    <ng-container *ngIf="t.status === 'Pending'">
+      <label for="comments">Comments</label>
+      <textarea id="comments" rows="3" [(ngModel)]="comments" placeholder="Optional comments"></textarea>
+
+      <div class="form-actions">
+        <ng-container *ngIf="t.stepType === 'Approval'">
+          <button type="button" class="btn-primary" [disabled]="acting()" (click)="act('approve')">Approve</button>
+          <button type="button" class="btn-secondary" [disabled]="acting()" (click)="act('reject')">Reject</button>
+        </ng-container>
+        <ng-container *ngIf="t.stepType === 'HumanTask'">
+          <button type="button" class="btn-primary" [disabled]="acting()" (click)="act('complete')">Complete</button>
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
+
+  <h1 style="font-size: 1.1rem; margin-top: 24px;">History</h1>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Action</th>
+        <th>By</th>
+        <th>Comments</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let entry of t.history">
+        <td>{{ entry.action }}</td>
+        <td>{{ entry.actionByUserName }}</td>
+        <td>{{ entry.comments || '-' }}</td>
+        <td>{{ entry.actionDate | date: 'medium' }}</td>
+      </tr>
+      <tr *ngIf="t.history.length === 0">
+        <td colspan="4" class="empty">No actions taken yet.</td>
+      </tr>
+    </tbody>
+  </table>
+</ng-container>

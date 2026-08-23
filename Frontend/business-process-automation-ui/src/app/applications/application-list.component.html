@@ -1,0 +1,63 @@
+<div class="page-header">
+  <h1>Business Applications</h1>
+  <a *ngIf="canManage" routerLink="/applications/new" class="btn-primary">+ New Application</a>
+</div>
+
+<div class="toolbar">
+  <input
+    type="text"
+    placeholder="Search by name or description..."
+    [(ngModel)]="search"
+    (ngModelChange)="onSearchChange()"
+  />
+  <select [(ngModel)]="statusFilter" (ngModelChange)="onSearchChange()">
+    <option value="all">All statuses</option>
+    <option value="active">Active</option>
+    <option value="inactive">Inactive</option>
+  </select>
+</div>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<table class="data-table" *ngIf="!loading()">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Status</th>
+      <th>Forms</th>
+      <th>Workflows</th>
+      <th>Created By</th>
+      <th>Created Date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let app of applications()">
+      <td><a [routerLink]="['/applications', app.id]">{{ app.name }}</a></td>
+      <td>{{ app.description || '-' }}</td>
+      <td>
+        <span class="badge" [class.badge-active]="app.isActive" [class.badge-inactive]="!app.isActive">
+          {{ app.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </td>
+      <td>{{ app.formDefinitionCount }}</td>
+      <td>{{ app.workflowDefinitionCount }}</td>
+      <td>{{ app.createdByUserName }}</td>
+      <td>{{ app.createdDate | date: 'mediumDate' }}</td>
+      <td class="actions">
+        <a *ngIf="canManage" [routerLink]="['/applications', app.id, 'edit']">Edit</a>
+        <button *ngIf="canManage" type="button" (click)="toggleStatus(app)">
+          {{ app.isActive ? 'Deactivate' : 'Activate' }}
+        </button>
+      </td>
+    </tr>
+    <tr *ngIf="applications().length === 0">
+      <td colspan="8" class="empty">No applications found.</td>
+    </tr>
+  </tbody>
+</table>
+
+<app-pagination [page]="page" [totalCount]="totalCount()" [pageSize]="pageSize" (pageChange)="onPageChange($event)"></app-pagination>

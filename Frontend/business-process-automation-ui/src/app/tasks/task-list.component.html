@@ -1,0 +1,65 @@
+<div class="page-header">
+  <h1>Tasks</h1>
+</div>
+
+<div class="toolbar">
+  <button type="button" class="btn-secondary" [class.btn-primary]="tab === 'my'" (click)="switchTab('my')">My Tasks</button>
+  <button
+    type="button"
+    class="btn-secondary"
+    [class.btn-primary]="tab === 'pending'"
+    *ngIf="canSeePending"
+    (click)="switchTab('pending')"
+  >
+    Pending Tasks
+  </button>
+  <button type="button" class="btn-secondary" [class.btn-primary]="tab === 'completed'" (click)="switchTab('completed')">
+    Completed Tasks
+  </button>
+</div>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<table class="data-table" *ngIf="!loading()">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Application</th>
+      <th>Type</th>
+      <th>Assigned To</th>
+      <th>Status</th>
+      <th>Created Date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let task of tasks()">
+      <td>{{ task.title }}</td>
+      <td>{{ task.applicationName }}</td>
+      <td>{{ task.stepType }}</td>
+      <td>{{ task.assignedToUserName || task.assignedRoleName || '-' }}</td>
+      <td>
+        <span
+          class="badge"
+          [class.badge-active]="task.status === 'Approved' || task.status === 'Completed'"
+          [class.badge-inactive]="task.status === 'Pending'"
+          [style.background]="task.status === 'Rejected' ? '#fdeceb' : null"
+          [style.color]="task.status === 'Rejected' ? '#c0392b' : null"
+        >
+          {{ task.status }}
+        </span>
+      </td>
+      <td>{{ task.createdDate | date: 'medium' }}</td>
+      <td class="actions">
+        <a [routerLink]="['/tasks', task.id]">Open</a>
+      </td>
+    </tr>
+    <tr *ngIf="tasks().length === 0">
+      <td colspan="7" class="empty">No tasks in this view.</td>
+    </tr>
+  </tbody>
+</table>
+
+<app-pagination [page]="page" [totalCount]="totalCount()" [pageSize]="pageSize" (pageChange)="onPageChange($event)"></app-pagination>

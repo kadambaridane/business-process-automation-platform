@@ -1,0 +1,28 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">BPAP</div>
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/applications" routerLinkActive="active">Applications</a>
+      <a routerLink="/tasks" routerLinkActive="active">Tasks</a>
+      <a routerLink="/reports" routerLinkActive="active" *ngIf="auth.hasRole('Admin', 'Business User')">Reports</a>
+      <a routerLink="/users" routerLinkActive="active" *ngIf="auth.hasRole('Admin')">Users</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="spacer"></div>
+      <app-notification-bell></app-notification-bell>
+      <div class="user-info" *ngIf="auth.currentUser() as user">
+        <span class="username">{{ user.fullName }}</span>
+        <span class="role">{{ user.roles.join(', ') }}</span>
+        <button type="button" (click)="logout()">Logout</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

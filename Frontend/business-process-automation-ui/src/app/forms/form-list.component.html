@@ -1,0 +1,51 @@
+<div class="page-header">
+  <h1>Forms</h1>
+  <a [routerLink]="['/applications', applicationId]" class="btn-secondary">Back to Application</a>
+</div>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<div class="form-card" style="max-width: 100%; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end;">
+  <div style="flex: 1;">
+    <label for="newFormName">New form name</label>
+    <input id="newFormName" type="text" [(ngModel)]="newFormName" placeholder="e.g. Leave Request Form" />
+  </div>
+  <button type="button" class="btn-primary" [disabled]="creating" (click)="createForm()">
+    {{ creating ? 'Creating...' : 'Create Form' }}
+  </button>
+</div>
+
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<table class="data-table" *ngIf="!loading()">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Fields</th>
+      <th>Created Date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let form of forms()">
+      <td><a [routerLink]="['/applications', applicationId, 'forms', form.id]">{{ form.name }}</a></td>
+      <td>
+        <span class="badge" [class.badge-active]="form.isActive" [class.badge-inactive]="!form.isActive">
+          {{ form.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </td>
+      <td>{{ form.fieldCount }}</td>
+      <td>{{ form.createdDate | date: 'mediumDate' }}</td>
+      <td class="actions">
+        <a [routerLink]="['/applications', applicationId, 'forms', form.id]">Manage Fields</a>
+        <button type="button" (click)="toggleStatus(form)">
+          {{ form.isActive ? 'Deactivate' : 'Activate' }}
+        </button>
+      </td>
+    </tr>
+    <tr *ngIf="forms().length === 0">
+      <td colspan="5" class="empty">No forms configured yet.</td>
+    </tr>
+  </tbody>
+</table>

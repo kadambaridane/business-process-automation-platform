@@ -1,0 +1,87 @@
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<ng-container *ngIf="workflow() as wf">
+  <div class="page-header">
+    <h1>{{ wf.name }}</h1>
+    <div class="form-actions">
+      <a [routerLink]="['/applications', applicationId, 'workflows']" class="btn-secondary">Back to Workflows</a>
+      <button type="button" class="btn-secondary" (click)="toggleStatus()">
+        {{ wf.isActive ? 'Deactivate' : 'Activate' }}
+      </button>
+      <button type="button" class="btn-primary" (click)="openAddStep()">+ Add Step</button>
+    </div>
+  </div>
+
+  <p>
+    Status:
+    <span class="badge" [class.badge-active]="wf.isActive" [class.badge-inactive]="!wf.isActive">
+      {{ wf.isActive ? 'Active' : 'Inactive' }}
+    </span>
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Step Name</th>
+        <th>Type</th>
+        <th>Assignee / Action</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let step of wf.steps; let i = index">
+        <td>
+          <button type="button" (click)="moveStep(step, -1)" [disabled]="i === 0">↑</button>
+          <button type="button" (click)="moveStep(step, 1)" [disabled]="i === wf.steps.length - 1">↓</button>
+        </td>
+        <td>{{ step.name }}</td>
+        <td>{{ step.stepType }}</td>
+        <td>{{ step.assigneeRoleName || step.systemActionKey || '-' }}</td>
+        <td class="actions">
+          <button type="button" (click)="openEditStep(step)">Edit</button>
+          <button type="button" (click)="deleteStep(step)">Delete</button>
+        </td>
+      </tr>
+      <tr *ngIf="wf.steps.length === 0">
+        <td colspan="5" class="empty">No steps yet. Click "+ Add Step" to start building this workflow.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="form-card" *ngIf="showStepEditor" style="margin-top: 24px; max-width: 560px;">
+    <h1 style="font-size: 1.1rem;">{{ editingStepId ? 'Edit Step' : 'Add Step' }}</h1>
+
+    <form [formGroup]="stepForm" (ngSubmit)="saveStep()">
+      <label for="stepName">Step Name</label>
+      <input id="stepName" type="text" formControlName="name" placeholder="e.g. Manager Approval" />
+
+      <label for="stepType">Step Type</label>
+      <select id="stepType" formControlName="stepType">
+        <option *ngFor="let type of stepTypes" [value]="type">{{ type }}</option>
+      </select>
+
+      <ng-container *ngIf="needsAssigneeRole">
+        <label for="assigneeRoleId">Assignee Role</label>
+        <select id="assigneeRoleId" formControlName="assigneeRoleId">
+          <option [ngValue]="null" disabled>Select a role...</option>
+          <option *ngFor="let role of roles()" [ngValue]="role.id">{{ role.name }}</option>
+        </select>
+      </ng-container>
+
+      <ng-container *ngIf="needsSystemActionKey">
+        <label for="systemActionKey">System Action Key</label>
+        <input id="systemActionKey" type="text" formControlName="systemActionKey" placeholder="e.g. UpdateApplicationStatus" />
+      </ng-container>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save Step' }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="cancelStepEditor()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</ng-container>

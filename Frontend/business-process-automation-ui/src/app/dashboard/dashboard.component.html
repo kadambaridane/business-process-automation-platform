@@ -1,0 +1,102 @@
+<div class="page-header">
+  <h1>Welcome, {{ auth.currentUser()?.fullName }}</h1>
+</div>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<ng-container *ngIf="summary() as s">
+  <div class="stat-grid">
+    <div class="stat-tile accent-blue">
+      <span class="stat-label">Total Applications</span>
+      <span class="stat-value">{{ s.totalApplications }}</span>
+    </div>
+    <div class="stat-tile accent-gray">
+      <span class="stat-label">Pending Applications</span>
+      <span class="stat-value">{{ s.pendingApplications }}</span>
+    </div>
+    <div class="stat-tile accent-green">
+      <span class="stat-label">Approved Applications</span>
+      <span class="stat-value">{{ s.approvedApplications }}</span>
+    </div>
+    <div class="stat-tile accent-red">
+      <span class="stat-label">Rejected Applications</span>
+      <span class="stat-value">{{ s.rejectedApplications }}</span>
+    </div>
+    <div class="stat-tile accent-gray">
+      <span class="stat-label">Pending Tasks</span>
+      <span class="stat-value">{{ s.pendingTasks }}</span>
+    </div>
+    <div class="stat-tile accent-green">
+      <span class="stat-label">Completed Tasks</span>
+      <span class="stat-value">{{ s.completedTasks }}</span>
+    </div>
+  </div>
+
+  <div class="dashboard-columns">
+    <div>
+      <h1 class="section-title">Recent Applications</h1>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Created By</th>
+            <th>Created Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let app of s.recentApplications">
+            <td><a [routerLink]="['/applications', app.id]">{{ app.name }}</a></td>
+            <td>
+              <span class="badge" [class.badge-active]="app.isActive" [class.badge-inactive]="!app.isActive">
+                {{ app.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>{{ app.createdByUserName }}</td>
+            <td>{{ app.createdDate | date: 'mediumDate' }}</td>
+          </tr>
+          <tr *ngIf="s.recentApplications.length === 0">
+            <td colspan="4" class="empty">No applications yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h1 class="section-title">Recent Workflow Activity</h1>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Application</th>
+            <th>Status</th>
+            <th>Step</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let activity of s.recentWorkflowActivity">
+            <td><a [routerLink]="['/workflow-instances', activity.workflowInstanceId]">{{ activity.applicationName }}</a></td>
+            <td>
+              <span
+                class="badge"
+                [class.badge-active]="activity.status === 'Completed' || activity.status === 'Approved'"
+                [class.badge-inactive]="activity.status === 'InProgress'"
+                [style.background]="activity.status === 'Rejected' ? '#fdeceb' : null"
+                [style.color]="activity.status === 'Rejected' ? '#c0392b' : null"
+              >
+                {{ activity.status }}
+              </span>
+            </td>
+            <td>{{ activity.currentStepName || '-' }}</td>
+            <td>{{ activity.activityDate | date: 'short' }}</td>
+          </tr>
+          <tr *ngIf="s.recentWorkflowActivity.length === 0">
+            <td colspan="4" class="empty">No workflow activity yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</ng-container>

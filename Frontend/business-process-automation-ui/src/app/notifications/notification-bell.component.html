@@ -1,0 +1,30 @@
+<div class="bell-wrapper">
+  <button type="button" class="bell-button" (click)="togglePanel()" aria-label="Notifications">
+    🔔
+    <span class="badge-count" *ngIf="unreadCount() > 0">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+  </button>
+
+  <div class="backdrop" *ngIf="panelOpen()" (click)="closePanel()"></div>
+
+  <div class="panel" *ngIf="panelOpen()">
+    <div class="panel-header">
+      <span>Notifications</span>
+      <button type="button" class="link-button" (click)="markAllAsRead()" *ngIf="unreadCount() > 0">Mark all as read</button>
+    </div>
+
+    <div class="panel-list">
+      <div
+        class="panel-item"
+        *ngFor="let notification of recentNotifications()"
+        [class.unread]="!notification.isRead"
+        (click)="markAsRead(notification)"
+      >
+        <div class="panel-item-message">{{ notification.message }}</div>
+        <div class="panel-item-date">{{ notification.createdDate | date: 'short' }}</div>
+      </div>
+      <div class="panel-empty" *ngIf="recentNotifications().length === 0">No notifications yet.</div>
+    </div>
+
+    <a routerLink="/notifications" class="panel-footer" (click)="closePanel()">View all</a>
+  </div>
+</div>

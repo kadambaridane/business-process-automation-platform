@@ -1,0 +1,24 @@
+<div class="login-page">
+  <form class="login-card" [formGroup]="form" (ngSubmit)="submit()">
+    <h1>Business Process Automation Platform</h1>
+    <p class="subtitle">Sign in to continue</p>
+
+    <label for="usernameOrEmail">Username or email</label>
+    <input id="usernameOrEmail" type="text" formControlName="usernameOrEmail" autocomplete="username" />
+    <div class="field-error" *ngIf="form.get('usernameOrEmail')?.touched && form.get('usernameOrEmail')?.invalid">
+      Username or email is required.
+    </div>
+
+    <label for="password">Password</label>
+    <input id="password" type="password" formControlName="password" autocomplete="current-password" />
+    <div class="field-error" *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+      Password is required.
+    </div>
+
+    <div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Signing in...' : 'Sign in' }}
+    </button>
+  </form>
+</div>

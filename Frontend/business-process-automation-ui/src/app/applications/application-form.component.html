@@ -1,0 +1,23 @@
+<div class="page-header">
+  <h1>{{ isEditMode ? 'Edit Application' : 'New Application' }}</h1>
+</div>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<form class="form-card" [formGroup]="form" (ngSubmit)="submit()" *ngIf="!loading()">
+  <label for="name">Application Name</label>
+  <input id="name" type="text" formControlName="name" />
+  <div class="field-error" *ngIf="form.get('name')?.touched && form.get('name')?.invalid">
+    Name is required (max 200 characters).
+  </div>
+
+  <label for="description">Description</label>
+  <textarea id="description" rows="4" formControlName="description"></textarea>
+
+  <div class="form-actions">
+    <button type="submit" class="btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Saving...' : 'Save Application' }}
+    </button>
+    <a routerLink="/applications" class="btn-secondary">Cancel</a>
+  </div>
+</form>

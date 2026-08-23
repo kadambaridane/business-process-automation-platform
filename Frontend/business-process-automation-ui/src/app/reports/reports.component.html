@@ -1,0 +1,123 @@
+<div class="page-header">
+  <h1>Reports</h1>
+</div>
+
+<div class="toolbar">
+  <button type="button" class="btn-secondary" [class.btn-primary]="tab === 'applications'" (click)="switchTab('applications')">
+    Application Report
+  </button>
+  <button type="button" class="btn-secondary" [class.btn-primary]="tab === 'user-tasks'" (click)="switchTab('user-tasks')">
+    User-wise Tasks
+  </button>
+</div>
+
+<ng-container *ngIf="tab === 'applications'">
+  <div class="toolbar" style="flex-wrap: wrap;">
+    <select [(ngModel)]="statusFilter">
+      <option value="">All statuses</option>
+      <option value="InProgress">In Progress (Pending)</option>
+      <option value="Completed">Completed (Approved)</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+    <select [(ngModel)]="applicationIdFilter">
+      <option [ngValue]="null">All applications</option>
+      <option *ngFor="let app of applications()" [ngValue]="app.id">{{ app.name }}</option>
+    </select>
+    <input type="date" [(ngModel)]="dateFrom" title="From date" />
+    <input type="date" [(ngModel)]="dateTo" title="To date" />
+    <button type="button" class="btn-primary" (click)="applyFilters()">Apply Filters</button>
+  </div>
+
+  <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 20px;">
+    <div class="form-card" style="padding: 14px 18px;">
+      <div style="font-size: 0.75rem; color: #6b7385; text-transform: uppercase; font-weight: 600;">In Progress</div>
+      <div style="font-size: 1.5rem; font-weight: 700;">{{ countFor('InProgress') }}</div>
+    </div>
+    <div class="form-card" style="padding: 14px 18px;">
+      <div style="font-size: 0.75rem; color: #6b7385; text-transform: uppercase; font-weight: 600;">Completed</div>
+      <div style="font-size: 1.5rem; font-weight: 700;">{{ countFor('Completed') }}</div>
+    </div>
+    <div class="form-card" style="padding: 14px 18px;">
+      <div style="font-size: 0.75rem; color: #6b7385; text-transform: uppercase; font-weight: 600;">Rejected</div>
+      <div style="font-size: 1.5rem; font-weight: 700;">{{ countFor('Rejected') }}</div>
+    </div>
+  </div>
+
+  <app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+  <table class="data-table" *ngIf="!loading()">
+    <thead>
+      <tr>
+        <th>Application</th>
+        <th>Workflow</th>
+        <th>Submitted By</th>
+        <th>Status</th>
+        <th>Current Step</th>
+        <th>Started</th>
+        <th>Completed</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of reportRows()">
+        <td><a [routerLink]="['/workflow-instances', row.workflowInstanceId]">{{ row.applicationName }}</a></td>
+        <td>{{ row.workflowDefinitionName }}</td>
+        <td>{{ row.submittedByUserName }}</td>
+        <td>
+          <span
+            class="badge"
+            [class.badge-active]="row.status === 'Completed' || row.status === 'Approved'"
+            [class.badge-inactive]="row.status === 'InProgress'"
+            [style.background]="row.status === 'Rejected' ? '#fdeceb' : null"
+            [style.color]="row.status === 'Rejected' ? '#c0392b' : null"
+          >
+            {{ row.status }}
+          </span>
+        </td>
+        <td>{{ row.currentStepName || '-' }}</td>
+        <td>{{ row.startedDate | date: 'short' }}</td>
+        <td>{{ row.completedDate ? (row.completedDate | date: 'short') : '-' }}</td>
+        <td>{{ row.durationHours !== null ? (row.durationHours < 1 ? (row.durationHours * 60 | number: '1.0-0') + ' min' : (row.durationHours | number: '1.1-1') + ' hr') : '-' }}</td>
+      </tr>
+      <tr *ngIf="reportRows().length === 0">
+        <td colspan="8" class="empty">No matching records.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <app-pagination [page]="page" [totalCount]="totalCount()" [pageSize]="pageSize" (pageChange)="onPageChange($event)"></app-pagination>
+</ng-container>
+
+<ng-container *ngIf="tab === 'user-tasks'">
+  <div class="toolbar">
+    <input type="date" [(ngModel)]="dateFrom" title="From date" />
+    <input type="date" [(ngModel)]="dateTo" title="To date" />
+    <button type="button" class="btn-primary" (click)="switchTab('user-tasks')">Apply Filters</button>
+  </div>
+
+  <app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+  <table class="data-table" *ngIf="!loading()">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Approved</th>
+        <th>Rejected</th>
+        <th>Completed</th>
+        <th>Total Actioned</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of userTaskRows()">
+        <td>{{ row.fullName }} ({{ row.username }})</td>
+        <td>{{ row.approvedCount }}</td>
+        <td>{{ row.rejectedCount }}</td>
+        <td>{{ row.completedCount }}</td>
+        <td>{{ row.totalActioned }}</td>
+      </tr>
+      <tr *ngIf="userTaskRows().length === 0">
+        <td colspan="5" class="empty">No task activity in this range.</td>
+      </tr>
+    </tbody>
+  </table>
+</ng-container>

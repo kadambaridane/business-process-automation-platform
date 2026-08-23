@@ -1,0 +1,35 @@
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<ng-container *ngIf="application() as app">
+  <div class="page-header">
+    <h1>{{ app.name }}</h1>
+    <div class="form-actions">
+      <a [routerLink]="['/applications', app.id, 'submit']" class="btn-primary">Fill Out Form</a>
+      <ng-container *ngIf="canManage">
+        <a [routerLink]="['/applications', app.id, 'forms']" class="btn-secondary">Manage Forms</a>
+        <a [routerLink]="['/applications', app.id, 'workflows']" class="btn-secondary">Manage Workflows</a>
+        <a [routerLink]="['/applications', app.id, 'edit']" class="btn-secondary">Edit</a>
+        <button type="button" class="btn-secondary" (click)="toggleStatus()">
+          {{ app.isActive ? 'Deactivate' : 'Activate' }}
+        </button>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <p><strong>Status:</strong>
+      <span class="badge" [class.badge-active]="app.isActive" [class.badge-inactive]="!app.isActive">
+        {{ app.isActive ? 'Active' : 'Inactive' }}
+      </span>
+    </p>
+    <p><strong>Description:</strong> {{ app.description || '-' }}</p>
+    <p><strong>Created By:</strong> {{ app.createdByUserName }}</p>
+    <p><strong>Created Date:</strong> {{ app.createdDate | date: 'medium' }}</p>
+    <p><strong>Forms configured:</strong> {{ app.formDefinitionCount }}</p>
+    <p><strong>Workflows configured:</strong> {{ app.workflowDefinitionCount }}</p>
+  </div>
+
+  <p class="hint">Workflow execution (submitting into a running instance) lands in Phase 9.</p>
+</ng-container>

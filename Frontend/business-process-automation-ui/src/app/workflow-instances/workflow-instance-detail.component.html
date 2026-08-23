@@ -1,0 +1,56 @@
+<app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+
+<div class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<ng-container *ngIf="instance() as inst">
+  <div class="page-header">
+    <h1>{{ inst.workflowDefinitionName }}</h1>
+    <a [routerLink]="['/applications', inst.applicationId]" class="btn-secondary">Back to Application</a>
+  </div>
+
+  <div class="form-card" style="max-width: 640px;">
+    <p><strong>Application:</strong> {{ inst.applicationName }}</p>
+    <p><strong>Submitted By:</strong> {{ inst.submittedByUserName }}</p>
+    <p><strong>Status:</strong>
+      <span
+        class="badge"
+        [class.badge-active]="inst.status === 'Completed' || inst.status === 'Approved'"
+        [class.badge-inactive]="inst.status === 'InProgress'"
+        [style.background]="inst.status === 'Rejected' ? '#fdeceb' : null"
+        [style.color]="inst.status === 'Rejected' ? '#c0392b' : null"
+      >
+        {{ inst.status }}
+      </span>
+    </p>
+    <p *ngIf="inst.currentStepName"><strong>Current Step:</strong> {{ inst.currentStepName }}</p>
+    <p><strong>Started:</strong> {{ inst.startedDate | date: 'medium' }}</p>
+    <p *ngIf="inst.completedDate"><strong>Completed:</strong> {{ inst.completedDate | date: 'medium' }}</p>
+  </div>
+
+  <h1 style="font-size: 1.1rem; margin-top: 24px;">Step History</h1>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Step</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Outcome</th>
+        <th>Entered</th>
+        <th>Exited</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let step of history()">
+        <td>{{ step.stepName }}</td>
+        <td>{{ step.stepType }}</td>
+        <td>{{ step.status }}</td>
+        <td>{{ step.outcome || '-' }}</td>
+        <td>{{ step.enteredDate | date: 'short' }}</td>
+        <td>{{ step.exitedDate ? (step.exitedDate | date: 'short') : '-' }}</td>
+      </tr>
+      <tr *ngIf="history().length === 0">
+        <td colspan="6" class="empty">No step history yet.</td>
+      </tr>
+    </tbody>
+  </table>
+</ng-container>

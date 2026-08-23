@@ -1,0 +1,87 @@
+<form class="dynamic-form" [formGroup]="form" (ngSubmit)="submit()">
+  <div class="dynamic-field" *ngFor="let field of sortedFields">
+    <label *ngIf="field.fieldType !== 'Checkbox'" [for]="field.fieldName">
+      {{ field.label }}<span *ngIf="field.isRequired" class="required">*</span>
+    </label>
+
+    <ng-container [ngSwitch]="field.fieldType">
+      <input
+        *ngSwitchCase="'Text'"
+        [id]="field.fieldName"
+        type="text"
+        [formControlName]="field.fieldName"
+      />
+
+      <input
+        *ngSwitchCase="'Number'"
+        [id]="field.fieldName"
+        type="number"
+        [formControlName]="field.fieldName"
+      />
+
+      <input
+        *ngSwitchCase="'Email'"
+        [id]="field.fieldName"
+        type="email"
+        [formControlName]="field.fieldName"
+      />
+
+      <input
+        *ngSwitchCase="'Date'"
+        [id]="field.fieldName"
+        type="date"
+        [formControlName]="field.fieldName"
+      />
+
+      <textarea
+        *ngSwitchCase="'Textarea'"
+        [id]="field.fieldName"
+        rows="4"
+        [formControlName]="field.fieldName"
+      ></textarea>
+
+      <select *ngSwitchCase="'Dropdown'" [id]="field.fieldName" [formControlName]="field.fieldName">
+        <option value="" disabled>Select...</option>
+        <option *ngFor="let option of field.validationRules?.options ?? []" [value]="option">{{ option }}</option>
+      </select>
+
+      <div *ngSwitchCase="'Radio'" class="radio-group">
+        <label *ngFor="let option of field.validationRules?.options ?? []" class="radio-option">
+          <input type="radio" [formControlName]="field.fieldName" [value]="option" />
+          {{ option }}
+        </label>
+      </div>
+
+      <label *ngSwitchCase="'Checkbox'" class="checkbox-option">
+        <input type="checkbox" [formControlName]="field.fieldName" />
+        {{ field.label }}<span *ngIf="field.isRequired" class="required">*</span>
+      </label>
+    </ng-container>
+
+    <div class="field-error" *ngIf="hasError(field.fieldName)">
+      <span *ngIf="fieldControl(field.fieldName).errors?.['required'] || fieldControl(field.fieldName).errors?.['requiredTrue']">
+        {{ field.label }} is required.
+      </span>
+      <span *ngIf="fieldControl(field.fieldName).errors?.['email']">Enter a valid email address.</span>
+      <span *ngIf="fieldControl(field.fieldName).errors?.['minlength']">
+        Minimum length is {{ fieldControl(field.fieldName).errors?.['minlength'].requiredLength }}.
+      </span>
+      <span *ngIf="fieldControl(field.fieldName).errors?.['maxlength']">
+        Maximum length is {{ fieldControl(field.fieldName).errors?.['maxlength'].requiredLength }}.
+      </span>
+      <span *ngIf="fieldControl(field.fieldName).errors?.['min']">
+        Minimum value is {{ fieldControl(field.fieldName).errors?.['min'].min }}.
+      </span>
+      <span *ngIf="fieldControl(field.fieldName).errors?.['max']">
+        Maximum value is {{ fieldControl(field.fieldName).errors?.['max'].max }}.
+      </span>
+      <span *ngIf="fieldControl(field.fieldName).errors?.['pattern']">Value does not match the required format.</span>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn-primary" [disabled]="submitting">
+      {{ submitting ? 'Submitting...' : submitLabel }}
+    </button>
+  </div>
+</form>
